@@ -4,6 +4,7 @@ import 'package:flutter/material.dart';
 import 'colors.dart';
 import 'figure_image.dart';
 import 'game.dart';
+import 'letter.dart';
 
 class GamePage extends StatefulWidget {
   const GamePage({Key? key}) : super(key: key);
@@ -24,6 +25,7 @@ class _GamePageState extends State<GamePage> {
     Game.tries = 0;
     int randomIndex = Random().nextInt(words.length);
     currentWord = words[randomIndex];
+    correctGuesses = List.generate(currentWord.length, (index) => false);
     Game.selectedChar = [];
   }
 
@@ -34,6 +36,83 @@ class _GamePageState extends State<GamePage> {
   bool isGameLost() {
     return Game.tries >= 6;
   }
+  void onLetterPressed(String letter) {
+    if (!isGameWon() && !isGameLost()) {
+      if (!Game.selectedChar.contains(letter)) {
+        setState(() {
+          Game.selectedChar.add(letter);
+          print(Game.selectedChar);
+
+          bool isCorrectGuess = currentWord.split('').contains(letter.toLowerCase());
+
+          if (isCorrectGuess) {
+            // Correct guess
+            for (int i = 0; i < currentWord.length; i++) {
+              if (currentWord[i].toUpperCase() == letter.toUpperCase()) {
+                if (!correctGuesses[i]) {
+                  correctGuesses[i] = true;
+                }
+              }
+            }
+          } else {
+            // Incorrect guess
+            Game.tries++;
+          }
+
+          if (isGameWon()) {
+            // Handle win condition
+            showDialog(
+              context: context,
+              builder: (context) {
+                return AlertDialog(
+                  title: Text('You Win!'),
+                  content: Text('Congratulations! You guessed the word.'),
+                  actions: [
+                    TextButton(
+                      onPressed: () {
+                        Navigator.pop(context);
+                        // Clear the displayed word and start a new game
+                        setState(() {
+                          startNewGame();
+                        });
+
+                      },
+                      child: Text('Play Again'),
+                    ),
+
+                  ],
+                );
+              },
+            );
+          } else if (isGameLost()) {
+            // Handle lose condition
+            showDialog(
+              context: context,
+              builder: (context) {
+                return AlertDialog(
+                  title: Text('You Lose!'),
+                  content: Text('Sorry! You couldn\'t guess the word. The word was: $currentWord'),
+                  actions: [
+                    TextButton(
+                      onPressed: () {
+                        Navigator.pop(context);
+                        // Clear the displayed word
+                        setState(() {
+                          startNewGame();
+                        });
+                      },
+                      child: Text('Try Again'),
+                    ),
+                  ],
+                );
+              },
+            );
+          }
+        });
+      }
+    }
+  }
+
   @override
   Widget build(BuildContext context) {
     return Scaffold(
@@ -61,7 +140,43 @@ class _GamePageState extends State<GamePage> {
               ],
             ),
           ),
-
+          Row(
+            mainAxisAlignment: MainAxisAlignment.spaceEvenly,
+            children: currentWord
+                .split('')
+                .map((e) => letter(e.toUpperCase(),
+                !Game.selectedChar.contains(e.toUpperCase())))
+                .toList(),
+          ),
+          SizedBox(
+            width: double.infinity,
+            height: 250.0,
+            child: GridView.count(
+              crossAxisCount: 7,
+              mainAxisSpacing: 8.0,
+              crossAxisSpacing: 8.0,
+              padding: EdgeInsets.all(8.0),
+              children: alphabets.map((e) {
+                return RawMaterialButton(
+                  onPressed: () => onLetterPressed(e),
+                  shape: RoundedRectangleBorder(
+                    borderRadius: BorderRadius.circular(4.0),
+                  ),
+                  child: Text(
+                    e,
+                    style: TextStyle(
+                      color: Colors.white,
+                      fontSize: 30.0,
+                      fontWeight: FontWeight.bold,
+                    ),
+                  ),
+                  fillColor: Game.selectedChar.contains(e)
+                      ? Colors.black87
+                      : AppColor.primaryColorDark,
+                );
+              }).toList(),
+            ),
+          )
         ],
       ),
     );
