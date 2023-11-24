@@ -1,6 +1,9 @@
+import 'dart:math';
+
 import 'package:flutter/material.dart';
 import 'colors.dart';
 import 'figure_image.dart';
+import 'game.dart';
 
 class GamePage extends StatefulWidget {
   const GamePage({Key? key}) : super(key: key);
@@ -9,6 +12,28 @@ class GamePage extends StatefulWidget {
 }
 
 class _GamePageState extends State<GamePage> {
+  List<String> words = ['elias','elena','flutter', 'hangman', 'dart', 'widget'];
+  String currentWord = '';
+  List<String> alphabets = [
+    "A", "B", "C", "D", "E", "F", "G", "H", "I", "J", "K", "L", "M", "N",
+    "O", "P", "Q", "R", "S", "T", "U", "V", "W", "X", "Y", "Z"
+  ];
+  List<bool> correctGuesses = [];
+
+  void startNewGame() {
+    Game.tries = 0;
+    int randomIndex = Random().nextInt(words.length);
+    currentWord = words[randomIndex];
+    Game.selectedChar = [];
+  }
+
+  bool isGameWon() {
+    return correctGuesses.every((element) => element);
+  }
+
+  bool isGameLost() {
+    return Game.tries >= 6;
+  }
   @override
   Widget build(BuildContext context) {
     return Scaffold(
@@ -26,13 +51,13 @@ class _GamePageState extends State<GamePage> {
           Center(
             child: Stack(
               children: [
-                figureImage(true , "assets/hang.png"),
-                figureImage(true , "assets/head.png"),
-                figureImage(true , "assets/body.png"),
-                figureImage(true , "assets/ra.png"),
-                figureImage(true , "assets/la.png"),
-                figureImage(true , "assets/rl.png"),
-                figureImage(true , "assets/ll.png"),
+                figureImage(Game.tries >= 0, "assets/hang.png"),
+                figureImage(Game.tries >= 1, "assets/head.png"),
+                figureImage(Game.tries >= 2, "assets/body.png"),
+                figureImage(Game.tries >= 3, "assets/ra.png"),
+                figureImage(Game.tries >= 4, "assets/la.png"),
+                figureImage(Game.tries >= 5, "assets/rl.png"),
+                figureImage(Game.tries >= 6, "assets/ll.png"),
               ],
             ),
           ),
