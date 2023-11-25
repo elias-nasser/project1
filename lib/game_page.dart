@@ -21,6 +21,12 @@ class _GamePageState extends State<GamePage> {
   ];
   List<bool> correctGuesses = [];
 
+  @override
+  void initState() {
+    super.initState();
+    startNewGame();
+  }
+
   void startNewGame() {
     Game.tries = 0;
     int randomIndex = Random().nextInt(words.length);
@@ -162,8 +168,7 @@ class _GamePageState extends State<GamePage> {
                   shape: RoundedRectangleBorder(
                     borderRadius: BorderRadius.circular(4.0),
                   ),
-                  child: Text(
-                    e,
+                  child: Text(e,
                     style: TextStyle(
                       color: Colors.white,
                       fontSize: 30.0,
